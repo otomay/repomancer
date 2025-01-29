@@ -1,0 +1,149 @@
+﻿body {
+        margin: 0;
+        font-family: Arial, sans-serif;
+        background-color: #f4f4f9;
+        color: #333;
+    }
+    
+    .app-container {
+        max-width: 650px;
+        margin: 50px auto;
+        padding: 20px;
+        background: white;
+        box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        border-radius: 10px;
+    }
+    
+    h1 {
+        text-align: center;
+        color: #444;
+    }
+    
+    .form-container {
+        display: flex;
+        gap: 10px;
+        margin-bottom: 20px;
+    }
+    
+    input {
+        flex: 1;
+        padding: 10px;
+        border: 1px solid #ddd;
+        border-radius: 5px;
+    }
+    
+    button {
+        padding: 10px 15px;
+        background-color: #007bff;
+        color: white;
+        border: none;
+        border-radius: 5px;
+        cursor: pointer;
+    }
+    
+    button:disabled {
+        background-color: #ddd;
+        cursor: not-allowed;
+    }
+    
+    .results-container {
+        margin-top: 20px;
+        background: #f9f9f9;
+        padding: 15px;
+        border-radius: 5px;
+        border: 1px solid #ddd;
+    }
+
+    .results-content {
+        max-width: 95%;
+        max-height: 32vh;
+        overflow-x: auto;
+        white-space: pre-wrap;
+        word-wrap: break-word;
+        background-color: #f9f9f9;
+        padding: 10px;
+        border-radius: 4px;
+        font-family: 'Roboto', monospace;
+        font-size: 17px;
+    }
+    
+    .error-message {
+        color: red;
+        text-align: center;
+        font-size: 18px;
+        font-weight: bold;
+        background-color: rgba(255, 0, 0, 0.1); /* Para destacar */
+        padding: 10px;
+        border-radius: 5px;
+    }
+
+    .description, .disclaimer, .donation-links {
+        margin: 20px 0;
+        text-align: center;
+    }
+
+    .status-message {
+        font-size: 1.5em;
+        font-weight: bold;
+        padding: 10px;
+        margin: 10px 0;
+        border-radius: 5px;
+        text-align: center;
+    }
+    
+    .status-message.safe {
+        color: #155724;
+        background-color: #d4edda;
+        border: 1px solid #c3e6cb;
+    }
+    
+    .status-message.malicious {
+        color: #721c24;
+        background-color: #f8d7da;
+        border: 1px solid #f5c6cb;
+    }
+    .donation-links ul {
+        list-style-type: none;
+        padding: 0;
+    }
+    
+    .donation-links li {
+        margin: 5px 0;
+    }
+
+    @keyframes blink {
+        0% {
+            opacity: 1;
+        }
+        50% {
+            opacity: 0.5;
+        }
+        100% {
+            opacity: 1;
+        }
+    }
+    
+    .processing {
+        animation: blink 1s infinite;
+    }
+
+    .markdown-content {
+        background-color: transparent;
+    }
+
+    .header {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+    }
+    
+    .logo {
+        width: 40px;
+        height: auto;
+        margin-right: 10px;
+    }
+    
+    h1 {
+        font-size: 2rem;
+        margin: 0;
+    }
