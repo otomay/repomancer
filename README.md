@@ -8,7 +8,7 @@
   <img src="repo-assets/repomancer-frontend.png" />
 </p>
 
-🧪 [Demo](https://repomancer.vercel.app/) *(rate limited, can't scam BIG repos (>200mb))*
+🧪 [Demo](https://repomancer.vercel.app/) *(rate limited, can't scan BIG repos (>200mb))*
 
 ## 📝 Description
 
