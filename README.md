@@ -112,6 +112,14 @@ npm start
 The application will be available at **[http://localhost:3000](http://localhost:3000)**. 
 Just enter a GitHub repository URL to start the analysis. The system will download the repository and display the results.
 
+## 🔎 How it works
+
+<p align="center">
+  <img src="repo-assets/Workflow.png" />
+</p>
+
+> Shotout to excalidraw
+
 ## 🤝 How to Contribute
 
 1. Fork the repository.
