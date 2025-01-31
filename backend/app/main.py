@@ -1,15 +1,14 @@
-﻿from fastapi import FastAPI, HTTPException, WebSocket, WebSocketDisconnect
+﻿from fastapi import FastAPI, HTTPException
 from fastapi.staticfiles import StaticFiles
+from fastapi.middleware.cors import CORSMiddleware
+from fastapi.responses import StreamingResponse
 from app.services.clone_repo import clone_repository
 from app.services.context_analysis import analyze_context
 from app.services.code_scanner import scan_code
 from pydantic import BaseModel
-from fastapi.middleware.cors import CORSMiddleware
-import os
+import asyncio
 
 app = FastAPI()
-
-expose_backend = os.getenv("EXPOSE_BACKEND", "false").lower() == "true"
 
 app.add_middleware(
     CORSMiddleware,
@@ -22,37 +21,35 @@ app.add_middleware(
 class AnalyzeRequest(BaseModel):
     repository_url: str
 
-if expose_backend:
-    @app.post("/api/analyze")
-    async def analyze_repository(request: AnalyzeRequest):
-        try:
-            repo_path = clone_repository(request.repository_url)
-            context = analyze_context(repo_path)
-            results = await scan_code(repo_path, context)
-            return results
-        except Exception as e:
-            raise HTTPException(status_code=500, detail=str(e))
+progress_updates = {}
 
-@app.websocket("/ws/progress")
-async def websocket_endpoint(websocket: WebSocket):
-    await websocket.accept()
+@app.post("/api/analyze")
+async def analyze_repository(request: AnalyzeRequest):
     try:
-        async def progress_callback(progress):
-            await websocket.send_json({"progress": progress})
-
-        repo_url = await websocket.receive_text()
-        repo_path = clone_repository(repo_url)
+        repo_path = clone_repository(request.repository_url)
         context = analyze_context(repo_path)
-        results = await scan_code(repo_path, context, progress_callback)
         
-        await websocket.send_json(results)
-    except WebSocketDisconnect:
-        pass
+        async def progress_callback(progress):
+            progress_updates[request.repository_url] = progress
+
+        results = await scan_code(repo_path, context, progress_callback)
+        return results
     except Exception as e:
-        error_message = {"error": str(e)}
-        await websocket.send_json(error_message)
+        raise HTTPException(status_code=500, detail=str(e))
     finally:
-        await websocket.close()
+        progress_updates[request.repository_url] = 0
+
+@app.get("/api/progress")
+async def get_progress(repo_url: str):
+    async def event_stream():
+        while True:
+            progress = progress_updates.get(repo_url, 0)
+            yield f"data: {progress}\n\n"
+            await asyncio.sleep(2)
+            if progress >= 100:
+                break
+
+    return StreamingResponse(event_stream(), media_type="text/event-stream")
 
 try:
     app.mount("/", StaticFiles(directory="../frontend/build", html=True), name="static")

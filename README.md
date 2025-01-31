@@ -23,6 +23,10 @@ With this project, you can provide a GitHub repository URL and receive a detaile
 - **Malicious Code Identification**: Uses AI to detect malicious code patterns with a robust redundancy system and strong contextualization between files.
 - **Detailed Reports**: Provides a conclusion based on the analysis results and highlights the **potential risks** identified.
 
+> The tool is sensitive and may report false positives. It is up to you to use common sense to decide whether the reports are valid and considered security risks.
+
+> Keep in mind that large repositories may take a long time to analyze.
+
 ## 🛠️ Self Hosting / Local Deploy with Docker Compose
 
 The easiest way to run **Repomancer** is by using the ready-made Docker Compose image.
@@ -37,9 +41,7 @@ services:
       - "3000:3000"
     environment:
       - OPENAI_API_KEY=xxx
-      - OPENAI_MODEL=gpt-4o-mini # gpt >4 recommended because of the maximum token length.
       - OPENAI_API_PARAMS= # Optional -> Use to pass additional parameters to the OpenAI API client
-      - EXPOSE_BACKEND=false # Optional -> Use to expose the backend post route (/api/analyze). Useful for scripts with loop and schedulling.
       - UVICORN_WORKERS=1 # Optional -> Use to set the concurrency level of the Uvicorn server
 ```
 
@@ -49,8 +51,8 @@ services:
 
 Make sure you have the following tools installed:
 
-- **Python 3.9+**: To run the application backend.
-- **Node.js** (optional): To run the frontend locally.
+- **Python 3.9+**: To run the backend.
+- **Node.js**: To run the frontend.
 - **Git**: To clone repositories.
 
 ### 2. Running Locally

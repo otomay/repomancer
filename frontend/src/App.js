@@ -1,55 +1,67 @@
-﻿import React, { useState } from 'react';
-import ReactMarkdown from 'react-markdown';
-import remarkGfm from 'remark-gfm';
-import './styles.css';
+﻿import React, { useState, useEffect } from "react";
+import ReactMarkdown from "react-markdown";
+import remarkGfm from "remark-gfm";
+import "./styles.css";
 
 const App = () => {
-    const [repoUrl, setRepoUrl] = useState('');
+    const [repoUrl, setRepoUrl] = useState("");
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState(null);
     const [results, setResults] = useState(null);
     const [progress, setProgress] = useState(0);
-    const [status, setStatus] = useState('');
+    const [status, setStatus] = useState("");
 
     const handleAnalyze = async () => {
         setLoading(true);
         setError(null);
         setResults(null);
         setProgress(0);
-        setStatus('');
+        setStatus("");
 
         try {
             const isProduction = process.env.NODE_ENV === "production";
-            const ws = new WebSocket(
-                isProduction
-                    ? `${window.location.origin.replace(/^http/, "ws")}/ws/progress`
-                    : "ws://localhost:8000/ws/progress"
-            );
+            const backendUrl = isProduction
+                ? window.location.origin
+                : "http://localhost:8000";
 
-            ws.onopen = () => {
-                ws.send(repoUrl);
-            };
-            ws.onmessage = (event) => {
-                const data = JSON.parse(event.data);
-                if (data.error) {
-                    setError(data.error);
-                    setLoading(false);
-                } else if (data.progress !== undefined) {
-                    setProgress(parseFloat(data.progress.toFixed(2)));
-                } else if (data.results) {
-                    setResults({ results: data.results });
-                    setLoading(false);
-                    const isMalicious = data.results.includes('[MALICIOUS]');
-                    setStatus(isMalicious ? 'MALICIOUS REPOSITORY' : 'SECURE REPOSITORY');
-                }
-            };
-            ws.onclose = () => {
-                setLoading(false);
-            };
+            startProgressTracking(backendUrl, repoUrl);
+
+            const response = await fetch(`${backendUrl}/api/analyze`, {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({ repository_url: repoUrl }),
+            });
+
+            if (!response.ok) {
+                throw new Error("An error occurred during the analysis.");
+            }
+
+            const data = await response.json();
+            setResults({ results: data.results });
+            setLoading(false);
+
+            const isMalicious = data.results.includes("[MALICIOUS]");
+            setStatus(isMalicious ? "MALICIOUS REPOSITORY" : "SECURE REPOSITORY");
         } catch (err) {
-            setError('An error occurred while analyzing the repository: ' + err);
+            setError("Error analyzing the repository: " + err.message);
             setLoading(false);
         }
+    };
+
+    const startProgressTracking = (backendUrl, repoUrl) => {
+        const progressUrl = `${backendUrl}/api/progress?repo_url=${encodeURIComponent(repoUrl)}`;
+        const eventSource = new EventSource(progressUrl);
+
+        eventSource.onmessage = (event) => {
+            setProgress(parseFloat(event.data));
+            if (event.data === "100") {
+                eventSource.close();
+            }
+        };
+
+        eventSource.onerror = () => {
+            eventSource.close();
+        };
     };
 
     return (
@@ -69,15 +81,15 @@ const App = () => {
                     onChange={(e) => setRepoUrl(e.target.value)}
                 />
                 <button onClick={handleAnalyze} disabled={loading || !repoUrl}>
-                    {loading ? 'Analyzing...' : 'Analyze'}
+                    {loading ? "Analyzing..." : "Analyze"}
                 </button>
             </div>
 
-            {loading && <p className="processing">Processing: {progress}%</p>} 
+            {loading && <p className="processing">Processing: {progress.toFixed(2)}%</p>}
             {error && <p className="error-message">{error}</p>}
 
             {status && (
-                <div className={`status-message ${status === 'MALICIOUS REPOSITORY' ? 'malicious' : 'safe'}`}>
+                <div className={`status-message ${status === "MALICIOUS REPOSITORY" ? "malicious" : "safe"}`}>
                     {status}
                 </div>
             )}
@@ -86,7 +98,7 @@ const App = () => {
                     <h2 className="text-xl font-semibold mb-4">Analysis Results</h2>
                     <div className="results-content text-xl font-semibold text-gray-800 mb-4">
                         <ReactMarkdown
-                            children={results.results.replace('[MALICIOUS]', '').replace('[SAFE]', '')}
+                            children={results.results.replace("[MALICIOUS]", "").replace("[SAFE]", "")}
                             remarkPlugins={[remarkGfm]}
                             className="markdown-content"
                         />
@@ -95,7 +107,6 @@ const App = () => {
             )}
         </div>
     );
-    
 };
 
 export default App;
