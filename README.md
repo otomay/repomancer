@@ -8,6 +8,8 @@
   <img src="repo-assets/repomancer-frontend.png" />
 </p>
 
+🧪 [Demo](https://repomancer.vercel.app/) *(rate limited, can't scam BIG repos (>200mb))*
+
 ## 📝 Description
 
 Sometimes it's easy to tell if a github repository is malicious: too much forks, no issues and PR section, no relevant commits... but sometimes isn't that easy.
